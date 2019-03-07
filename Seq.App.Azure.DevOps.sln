@@ -19,8 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6ED53D
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seq.App.Azure.DevOps.Tests", "Seq.App.Azure.DevOps.Tests\Seq.App.Azure.DevOps.Tests.csproj", "{9C816B88-724B-4098-8A12-485D24BDF7B3}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{D328AD71-CB39-4477-8CF0-3C608DEB1573}"
 	ProjectSection(SolutionItems) = preProject
 		assets\devopssuite.png = assets\devopssuite.png
@@ -36,10 +34,6 @@ Global
 		{91D16842-EA68-4BA0-8427-DF6EBFD7B90F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91D16842-EA68-4BA0-8427-DF6EBFD7B90F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91D16842-EA68-4BA0-8427-DF6EBFD7B90F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C816B88-724B-4098-8A12-485D24BDF7B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C816B88-724B-4098-8A12-485D24BDF7B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C816B88-724B-4098-8A12-485D24BDF7B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C816B88-724B-4098-8A12-485D24BDF7B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
