@@ -2,7 +2,7 @@
   <metadata>
     <id>Seq.App.Azure.DevOps</id>
     <version>$version$</version>
-    <authors>Matt Olson</authors>
+    <authors>xantari, delubear</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An app for Seq (https://getseq.net) that forwards events to Azure DevOps.</description>
     <language>en-US</language>
