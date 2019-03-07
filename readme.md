@@ -1,4 +1,4 @@
-﻿# Seq Azure DevOps (TFS / VSTS) [![Build status](https://ci.appveyor.com/api/projects/status/k03t9s0ubtylqixi/branch/master?svg=true)](https://ci.appveyor.com/project/seqlogs/seq-apps/branch/master) [![NuGet tag](https://img.shields.io/badge/nuget-seq--app-blue.svg)](https://www.nuget.org/packages?q=seq-app)
+﻿# Seq Azure DevOps (TFS / VSTS) [![Build status](https://ci.appveyor.com/api/projects/status/k03t9s0ubtylqixi/branch/master?svg=true)](https://ci.appveyor.com/project/xantari/seq-app-azure-devops/branch/master) [![NuGet tag](https://img.shields.io/badge/nuget-seq--app-blue.svg)](https://www.nuget.org/packages?q=seq-app)
 
 Azure DevOps App for the [Seq](http://getseq.net) event server.
 

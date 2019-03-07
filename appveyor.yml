@@ -12,7 +12,7 @@ before_build:
 - cmd: nuget.exe restore Seq.App.Azure.DevOps.sln
 build:
   project: Seq.App.Azure.DevOps.sln
-  publish_nuget: false
+  publish_nuget: true
   publish_nuget_symbols: false
   verbosity: minimal
 deploy:

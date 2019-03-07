@@ -20,8 +20,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Debug\Newtonsoft.Json.dll" target="lib\net452" />
-    <file src="bin\Debug\Microsoft*.dll" target="lib\net452" />
-    <file src="bin\Debug\System*.dll" target="lib\net452" />
+    <file src="bin\Newtonsoft.Json.dll" target="lib\net452" />
+    <file src="bin\Microsoft*.dll" target="lib\net452" />
+    <file src="bin\System*.dll" target="lib\net452" />
   </files>
 </package>
