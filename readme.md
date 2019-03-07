@@ -6,6 +6,7 @@ Azure DevOps App for the [Seq](http://getseq.net) event server.
 
 This Seq App allows you to create Tasks and Bugs from within your Seq logging server and send them to Azure DevOps (aka Team Foundation Server (TFS), aka Visual Studio Team Services (VSTS))
 
+For help with Field Definitions to place in the various configuration settings see this site:
 https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/fields/list?view=azure-devops-rest-5.0
 
 ## Authors

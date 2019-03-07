@@ -354,7 +354,7 @@ namespace Seq.App.Azure.DevOps
                 sb.AppendFormat("<strong>Event Id:</strong> {0}<br/>", evt.Id);
                 sb.AppendFormat("<strong>Level:</strong> {0}<br/>", evt.Data.Level.ToString());
                 sb.AppendFormat("<strong>Timestamp:</strong> {0}<br/>", evt.Data.LocalTimestamp.ToLocalTime());
-                var eventUrl = $"{Host.BaseUri}#/events?filter=@Id%20%3D%20'{evt.Id}'";
+                var eventUrl = $"{Host.BaseUri}#/events?filter=@Id%20%3D%20'{evt.Id}'%22&show=expanded";
                 sb.Append($"<strong>Event Url:</strong> <a href=\"{eventUrl}\" target=\"_blank\">Seq Event Url</a><br/>");
 
                 foreach (var m in evt.Data.Properties.Keys)
@@ -390,7 +390,7 @@ namespace Seq.App.Azure.DevOps
                     if (tok.ToString() == "SeqTimestamp")
                         sb.Append(evt.Data.LocalTimestamp.ToLocalTime());
                     if (tok.ToString() == "SeqEventUrl")
-                        sb.Append($"{Host.BaseUri}#/events?filter=@Id%20%3D%20'{evt.Id}'");
+                        sb.Append($"{Host.BaseUri}#/events?filter=@Id%20%3D%20'{evt.Id}'%22&show=expanded");
                     else
                         sb.Append(evt.Data.Properties[tok.ToString().Replace("{", "").Replace("}", "")]);
                 }
