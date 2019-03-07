@@ -13,7 +13,6 @@ before_build:
 build:
   project: Seq.App.Azure.DevOps.sln
   publish_nuget: true
-  include_nuget_references: true
   publish_nuget_symbols: false
   verbosity: minimal
 deploy:
