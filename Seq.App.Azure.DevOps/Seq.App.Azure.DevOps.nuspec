@@ -1,0 +1,27 @@
+﻿<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Seq.App.Azure.DevOps</id>
+    <version>$version$</version>
+    <authors>Matt Olson</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An app for Seq (https://getseq.net) that forwards events to Azure DevOps.</description>
+    <language>en-US</language>
+    <projectUrl>https://github.com/xantari/Seq.App.Azure.DevOps</projectUrl>
+    <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/xantari/Seq.App.Azure.DevOps/assets/devopssuite.png</iconUrl>
+    <tags>seq-app seq serilog events azure devops tfs microsoft</tags>
+    <dependencies>
+      <group targetFramework="net452">
+        <dependency id="Microsoft.TeamFoundationServer.Client" version="15.131.1" />
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="Seq.Apps" version="5.0.0" />
+        <dependency id="Serilog" version="2.5.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Debug\Newtonsoft.Json.dll" target="lib\net452" />
+    <file src="bin\Debug\Microsoft*.dll" target="lib\net452" />
+    <file src="bin\Debug\System*.dll" target="lib\net452" />
+  </files>
+</package>
