@@ -393,8 +393,7 @@ namespace Seq.App.Azure.DevOps
                 sb.AppendFormat("<strong>Event Id:</strong> {0}<br/>", evt.Id);
                 sb.AppendFormat("<strong>Level:</strong> {0}<br/>", evt.Data.Level.ToString());
                 sb.AppendFormat("<strong>Timestamp:</strong> {0}<br/>", evt.Data.LocalTimestamp.ToLocalTime());
-                var eventUrl = $"{Host.BaseUri}#/events?filter=@Id%20%3D%20'{evt.Id}'%22&show=expanded";
-                sb.Append($"<strong>Event Url:</strong> <a href=\"{eventUrl}\" target=\"_blank\">Seq Event Url</a><br/>");
+                sb.Append($"<strong>Event Url:</strong> <a href=\"{GetSeqUrl(evt)}\" target=\"_blank\">Seq Event Url</a><br/>");
 
                 foreach (var m in evt.Data.Properties.Keys)
                 {
@@ -408,6 +407,11 @@ namespace Seq.App.Azure.DevOps
                     sb.AppendFormat("<strong>Exception:</strong><p style=\"background-color: #921b3c; color: white; border-left: 8px solid #7b1e38;\">{0}</p>", evt.Data.Exception);
                 return sb.ToString();
             }
+        }
+
+        private string GetSeqUrl(Event<LogEventData> evt)
+        {
+            return $"{Host.BaseUri}#/events?filter=@Id%20%3D%20'{evt.Id}'&show=expanded";
         }
 
         private string GetSeqMappedPropertyString(string messageTemplate, Event<LogEventData> evt)
@@ -430,7 +434,7 @@ namespace Seq.App.Azure.DevOps
                     if (tok.ToString() == "SeqTimestamp")
                         sb.Append(evt.Data.LocalTimestamp.ToLocalTime());
                     if (tok.ToString() == "SeqEventUrl")
-                        sb.Append($"{Host.BaseUri}#/events?filter=@Id%20%3D%20'{evt.Id}'%22&show=expanded");
+                        sb.Append(GetSeqUrl(evt));
                     if (tok.ToString() == "SeqException")
                     {
                         if ((evt?.Data?.Exception ?? "").HasValue())
