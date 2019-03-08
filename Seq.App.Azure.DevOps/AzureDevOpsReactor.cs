@@ -13,6 +13,8 @@ using Newtonsoft;
 using Serilog.Events;
 using Serilog.Parsing;
 using Newtonsoft.Json;
+using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
+using Microsoft.VisualStudio.Services.WebApi.Patch;
 
 namespace Seq.App.Azure.DevOps
 {
@@ -56,7 +58,7 @@ namespace Seq.App.Azure.DevOps
                 strValues.Aggregate(result, (acc, strValue) =>
                 {
                     Apps.LogEvents.LogEventLevel enumValue = Apps.LogEvents.LogEventLevel.Debug;
-                    if (Enum.TryParse<Apps.LogEvents.LogEventLevel>(strValue, out enumValue))
+                    if (Enum.TryParse(strValue, out enumValue))
                         acc.Add(enumValue);
                     return acc;
                 });
@@ -78,7 +80,7 @@ namespace Seq.App.Azure.DevOps
 
         //Microsoft.VSTS.CMMI.Symptom
         [SeqAppSetting(DisplayName = "Description Mapping Field",
-            HelpText = "Description DevOps Mapping Field. For Bugs using CMMI this typically be Microsoft.VSTS.CMMI.Symptom, For CMMI Tasks it would be: System.Description. For Bugs in Scrumm you might use Repro Steps: Microsoft.VSTS.TCM.ReproSteps",
+            HelpText = "Description DevOps Mapping Field. For Bugs using CMMI this typically be Microsoft.VSTS.CMMI.Symptom, For CMMI Tasks it would be: System.Description. For Bugs in Scrum you might use Repro Steps: Microsoft.VSTS.TCM.ReproSteps",
             IsOptional = false)]
         public string DescriptionDevOpsMappingField { get; set; }
 
@@ -101,6 +103,12 @@ namespace Seq.App.Azure.DevOps
         public string Iteration { get; set; }
 
         [SeqAppSetting(
+          DisplayName = "Assigned To",
+          IsOptional = true,
+          HelpText = "Who the work item should be assigned to. If left blank it will default to unassigned")]
+        public string AssignedTo { get; set; }
+
+        [SeqAppSetting(
             DisplayName = "Seq Event Id custom field # within DevOps",
             IsOptional = true,
             HelpText = "Azure DevOps custom field to store Seq Event Id. If provided will be used to prevent duplicate issue creation")]
@@ -111,6 +119,12 @@ namespace Seq.App.Azure.DevOps
             IsOptional = false,
             HelpText = "DevOps issue type. Possible values: Task, Bug")]
         public string DevOpsIssueType { get; set; }
+
+        [SeqAppSetting(
+            DisplayName = "Parent Link URL",
+            IsOptional = true,
+            HelpText = "Link to the parent related work item. Example: https://yoursite.visualstudio.com/{yourproject}/_workitems/edit/7494. This is useful if you want to make sure all items sent from Seq show up in the same Requirement bucket in CMMI or a product backlog item when using Scrum. If not defined it will be unparented.")]
+        public string ParentWorkItemLinkUrl { get; set; }
 
         //See here for out of box field names: https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/fields/list?view=azure-devops-rest-5.0
         [SeqAppSetting(
@@ -203,7 +217,7 @@ namespace Seq.App.Azure.DevOps
 
             _step = "Adding fields";
             LogIfDebug(_step);
-            var document = new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchDocument();
+            var document = new JsonPatchDocument();
 
             _step = "Adding title";
             string title = $"SEQ Event - {evt.Data.RenderedMessage}".TruncateWithEllipsis(255); //DevOps has max 255 character length for title
@@ -212,21 +226,49 @@ namespace Seq.App.Azure.DevOps
                 title = GetSeqMappedPropertyString(Title, evt).TruncateWithEllipsis(255);
             }
             document.Add(
-                new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
+                new JsonPatchOperation()
                 {
                     Path = "/fields/System.Title",
-                    Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                    Operation = Operation.Add,
                     Value = title
                 });
+
+            document.Add(
+                new JsonPatchOperation()
+                {
+                    Path = "/fields/System.AssignedTo",
+                    Operation = Operation.Add,
+                    Value = AssignedTo ?? string.Empty
+                });
+
+            if (!ParentWorkItemLinkUrl.IsNullOrEmpty())
+            {
+                document.Add(
+                    new JsonPatchOperation()
+                    {
+                        Operation = Operation.Add,
+                        Path = "/relations/-",
+                        Value = new
+                        {
+                            rel = "System.LinkTypes.Hierarchy-Reverse",
+                            url = ParentWorkItemLinkUrl,
+                            attributes = new
+                            {
+                                comment = "Seq Event Auto-Parent Link"
+                            }
+                        }
+                    }
+                );
+            }
 
             if (!string.IsNullOrEmpty(SeqEventField))
             {
                 _step = "Adding Seq ID mapping";
                 LogIfDebug(_step);
-                document.Add(new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
+                document.Add(new JsonPatchOperation()
                 {
                     Path = "/fields/" + SeqEventField,
-                    Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                    Operation = Operation.Add,
                     Value = evt.Id
                 });
             }
@@ -235,10 +277,10 @@ namespace Seq.App.Azure.DevOps
             {
                 _step = "Adding tags";
                 LogIfDebug(_step);
-                document.Add(new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
+                document.Add(new JsonPatchOperation()
                 {
                     Path = "/fields/Tags",
-                    Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                    Operation = Operation.Add,
                     Value = Tags //DevOps takes a comma seperated list without any alterations
                 });
             }
@@ -247,10 +289,10 @@ namespace Seq.App.Azure.DevOps
             LogIfDebug(_step);
 
             document.Add(
-                new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
+                new JsonPatchOperation()
                 {
                     Path = $"/fields/{DescriptionDevOpsMappingField}",
-                    Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                    Operation = Operation.Add,
                     Value = RenderDescription(evt)
                 });
 
@@ -265,10 +307,10 @@ namespace Seq.App.Azure.DevOps
                     {
                         LogIfDebug("Setting Seq to DevOps Property: " + value.Value + " Value: " + value.Key);
                         document.Add(
-                        new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
+                        new JsonPatchOperation()
                         {
                             Path = $"/fields/{value.Value}",
-                            Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                            Operation = Operation.Add,
                             Value = evt.Data.Properties[value.Key]
                         });
                     }
@@ -284,10 +326,10 @@ namespace Seq.App.Azure.DevOps
                 {
                     LogIfDebug("Setting DevOps Static Property: " + value.Key + " Value: " + value.Value);
                     document.Add(
-                    new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
+                    new JsonPatchOperation()
                     {
                         Path = $"/fields/{value.Key}",
-                        Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                        Operation = Operation.Add,
                         Value = value.Value
                     });
                 }
@@ -298,10 +340,10 @@ namespace Seq.App.Azure.DevOps
                 _step = "Setting Area Path";
                 LogIfDebug(_step);
                 document.Add(
-                new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
+                new JsonPatchOperation()
                 {
                     Path = $"/fields/System.AreaPath",
-                    Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                    Operation = Operation.Add,
                     Value = AreaPath
                 });
             }
@@ -311,10 +353,10 @@ namespace Seq.App.Azure.DevOps
                 _step = "Setting Iteration";
                 LogIfDebug(_step);
                 document.Add(
-                new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
+                new JsonPatchOperation()
                 {
                     Path = $"/fields/System.IterationPath",
-                    Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                    Operation = Operation.Add,
                     Value = Iteration
                 });
             }

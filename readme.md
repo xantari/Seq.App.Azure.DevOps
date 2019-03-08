@@ -51,9 +51,13 @@ The following built in tokens are provided: SeqEventId, SeqLevel, SeqTimestamp, 
 
 **Iteration:** The iteration to assign the work item to. If not defined it will take the default iteration.
 
+**Assigned To:** Who the work item should be assigned to. If left blank it will default to unassigned.
+
 **Seq Event Id custom field # within DevOps:** This field is a custom field you would add to your work items in Azure DevOps to track the event id from Seq. This would allow the system to prevent duplicate submissions to Azure DevOps.
 
 **Issue Type:** The issue type to create. Valid values are: Task, Bug
+
+**Parent Link URL:** Link to the parent related work item. Example: https://yoursite.visualstudio.com/{yourproject}/_workitems/edit/7494. This is useful if you want to make sure all items sent from Seq show up in the same Requirement bucket in CMMI or a product backlog item when using Scrum. If not defined it will be unparented.
 
 **Seq to DevOps property mapping:** Maps Seq properties to DevOps properties.  
 Format: SeqProperty:DevOpsProperty.  
