@@ -104,7 +104,7 @@ namespace Seq.App.Azure.DevOps
             DisplayName = "Seq Event Id custom field # within DevOps",
             IsOptional = true,
             HelpText = "Azure DevOps custom field to store Seq Event Id. If provided will be used to prevent duplicate issue creation")]
-        public int? SeqEventField { get; set; }
+        public string SeqEventField { get; set; }
 
         [SeqAppSetting(
             DisplayName = "Issue type",
@@ -177,7 +177,7 @@ namespace Seq.App.Azure.DevOps
 
             WorkItemQueryResult workItemQueryResult = null;
             // Try to match an existing work item
-            if (SeqEventField.HasValue)
+            if (!string.IsNullOrEmpty(SeqEventField))
             {
                 _step = "Querying existing work item";
                 LogIfDebug(_step);
@@ -194,7 +194,7 @@ namespace Seq.App.Azure.DevOps
                 //execute the query to get the list of work items in teh results
                 workItemQueryResult = await workitemClient.QueryByWiqlAsync(wiql);
 
-                if (workItemQueryResult.WorkItems.Count() == 0)
+                if (workItemQueryResult.WorkItems.Count() != 0)
                 {
                     Log.Information("Duplicate DevOps item creation prevented for event id {id}", evt.Id);
                     return false;
@@ -219,7 +219,7 @@ namespace Seq.App.Azure.DevOps
                     Value = title
                 });
 
-            if (SeqEventField.HasValue)
+            if (!string.IsNullOrEmpty(SeqEventField))
             {
                 _step = "Adding Seq ID mapping";
                 LogIfDebug(_step);
