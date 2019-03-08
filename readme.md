@@ -1,4 +1,4 @@
-﻿# Seq Azure DevOps (TFS / VSTS) [![Build status](https://ci.appveyor.com/api/projects/status/u41gy0ai2ekr5t49?svg=true)](https://ci.appveyor.com/project/xantari/seq-app-azure-devops) [![NuGet tag](https://img.shields.io/badge/nuget-seq--app-blue.svg)](https://www.nuget.org/packages?q=Seq.App.Azure.DevOps)
+﻿# Seq Azure DevOps (TFS / VSTS) [![Build status](https://ci.appveyor.com/api/projects/status/u41gy0ai2ekr5t49?svg=true)](https://ci.appveyor.com/project/xantari/seq-app-azure-devops) [![NuGet tag](https://img.shields.io/badge/nuget-Seq.App.Azure.DevOps-blue.svg)](https://www.nuget.org/packages?q=Seq.App.Azure.DevOps)
 
 Azure DevOps App for the [Seq](http://getseq.net) event server.
 
@@ -6,8 +6,9 @@ Azure DevOps App for the [Seq](http://getseq.net) event server.
 
 This Seq App allows you to create Tasks and Bugs from within your Seq logging server and send them to Azure DevOps (aka Team Foundation Server (TFS), aka Visual Studio Team Services (VSTS))
 
-For help with Field Definitions to place in the various configuration settings see this site:  
-https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/fields/list?view=azure-devops-rest-5.0
+You can find the nuget here: [Seq.App.Azure.DevOps Nuget](https://www.nuget.org/packages/Seq.App.Azure.DevOps/)
+
+For help with Field Definitions to place in the various configuration settings see this site:  [Azure DevOps Field Definitions](https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/fields/list?view=azure-devops-rest-5.0)
 
 ## Fields
 
@@ -22,7 +23,7 @@ Example: https://yoursite.visualstudio.com/ or https://dev.azure.com/{your organ
 
 **Title:** The Title Field defaults to "Seq Event - {message}", where {message} is the default Seq message you see on the Seq log page. You can customize the title with any of the Seq property names. The following built in tokens are provided: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl, SeqPropertiesList, SeqException
 
->NOTE: For this to work properly you would need to ensure you use property names that would exist on all types of log events.
+>**NOTE:** For this to work properly you would need to ensure you use property names that would exist on all types of log events.
 
 **Description:** The Description Field defaults to the following format:
 
@@ -38,11 +39,11 @@ Example: https://yoursite.visualstudio.com/ or https://dev.azure.com/{your organ
 
 The following built in tokens are provided: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl, SeqPropertiesList, SeqException.
 
->NOTE: For this to work properly you would need to ensure you use property names that would exist on all types of log events.
+>**NOTE:** For this to work properly you would need to ensure you use property names that would exist on all types of log events.
 
 **Description Mapping Field:** The field that the Description field listed above would map to in Azure DevOps. This is provided as different types of work items in DevOps would require the description to go into different fields. For Bugs using CMMI this typically be Microsoft.VSTS.CMMI.Symptom, For CMMI Tasks it would be: System.Description. For Bugs in Scrumm you might use Repro Steps: Microsoft.VSTS.TCM.ReproSteps
 
->NOTE: See the field definitions link above for help on field names.
+>**NOTE:** See the field definitions link above for help on field names.
 
 **Tags:** The tags is a comma seperated list of tags to add to the work item.
 
@@ -59,14 +60,14 @@ Format: SeqProperty:DevOpsProperty.
 Multiple values seperated by Commas.  
 `Example:` Application:Microsoft.VSTS.Build.FoundIn,MachineName:Microsoft.VSTS.TCM.SystemInfo 
 
->NOTE: See the field definitions link above for help on field names.
+>**NOTE:** See the field definitions link above for help on field names.
 
 **DevOps property mappings:** Maps DevOps properties to staticly defined values.  
 Format: DevOpsProperty:StaticValue  
 Multiple values seperated by Commas.  
 `Example:` Priority:2,Triage:Level 1
 
->NOTE: See the field definitions link above for help on field names.
+>**NOTE:** See the field definitions link above for help on field names.
 
 ## FAQ
 
@@ -81,7 +82,7 @@ System.AggregateException: One or more errors occurred. ---> Microsoft.VisualStu
 
 ## Screenshots
 
-![Seq.App.Azure.DevOps](https://github.com/xantari/Seq.App.Azure.DevOps/assets/ExampleBugSetup.png)
+![Seq.App.Azure.DevOps](https://github.com/xantari/Seq.App.Azure.DevOps/raw/master/assets/ExampleBugSetup.png)
 
 ## Authors
 * Matt Olson [@xantari](https://github.com/xantari)
