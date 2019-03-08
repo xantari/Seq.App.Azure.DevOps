@@ -13,18 +13,18 @@ namespace Seq.App.Azure.DevOps
     /// </summary>
     public static partial class ExtensionMethods
     {
-        public static ConcurrentBag<KeyValuePair<string,string>> ParseKeyValueArray(this string valueString)
+        public static ConcurrentBag<KeyValuePair<string, string>> ParseKeyValueArray(this string valueString)
         {
             ConcurrentBag<KeyValuePair<string, string>> values = new ConcurrentBag<KeyValuePair<string, string>>();
 
             if (!string.IsNullOrEmpty(valueString))
             {
-                foreach(var val in valueString.Split(',').ToArray())
+                foreach (var val in valueString.Split(',').ToArray())
                 {
                     string[] temp = val.Split(':').ToArray();
-                    if (temp.GetUpperBound(0)> 1)
+                    if (temp.GetUpperBound(0) == 1)
                     {
-                        values.Add(new KeyValuePair<string,string>(temp[0], temp[1]));
+                        values.Add(new KeyValuePair<string, string>(temp[0], temp[1]));
                     }
                 }
             }

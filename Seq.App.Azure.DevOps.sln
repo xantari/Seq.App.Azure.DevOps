@@ -22,6 +22,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{D328AD71-CB39-4477-8CF0-3C608DEB1573}"
 	ProjectSection(SolutionItems) = preProject
 		assets\devopssuite.png = assets\devopssuite.png
+		assets\ExampleBugSetup.png = assets\ExampleBugSetup.png
 	EndProjectSection
 EndProject
 Global

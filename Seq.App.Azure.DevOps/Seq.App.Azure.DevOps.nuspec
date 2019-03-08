@@ -4,7 +4,7 @@
     <version>$version$</version>
     <authors>xantari, delubear</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>An app for Seq (https://getseq.net) that forwards events to Azure DevOps.</description>
+    <description>An app for Seq (https://getseq.net) that forwards events to Azure DevOps (VSTS / TFS).</description>
     <language>en-US</language>
     <projectUrl>https://github.com/xantari/Seq.App.Azure.DevOps</projectUrl>
     <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>

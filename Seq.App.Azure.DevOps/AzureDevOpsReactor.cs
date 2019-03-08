@@ -66,13 +66,13 @@ namespace Seq.App.Azure.DevOps
         }
 
         [SeqAppSetting(DisplayName = "Title",
-        HelpText = "Title of created Azure DevOps items. Use {PropertyName} to insert properties into the field. Ex. {Application}, {Message}, etc. If not defined with will follow the format: Seq Event - {message}. Max Length is 255. The following special properties are available: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl",
+        HelpText = "Title of created Azure DevOps items. Use {PropertyName} to insert properties into the field. Ex. {Application}, {Message}, etc. If not defined with will follow the format: Seq Event - {message}. Max Length is 255. The following special properties are available: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl, SeqPropertiesList, SeqException",
         IsOptional = true)]
         public string Title { get; set; }
 
         [SeqAppSetting(DisplayName = "Description",
             InputType = SettingInputType.LongText,
-            HelpText = "Description of created Azure DevOps items. Use {PropertyName} to insert properties into the field. Ex. {Application}, {Message}, etc. If not defined with will output all properties and exception data from Seq in a pretty format. The following special properties are available: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl",
+            HelpText = "Description of created Azure DevOps items. Use {PropertyName} to insert properties into the field. Ex. {Application}, {Message}, etc. If not defined with will output all properties and exception data from Seq in a pretty format. The following special properties are available: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl, SeqPropertiesList, SeqException",
             IsOptional = true)]
         public string Message { get; set; }
 
@@ -282,17 +282,14 @@ namespace Seq.App.Azure.DevOps
                 var keyValuePairs = DevOpsMappings.ParseKeyValueArray();
                 foreach (var value in keyValuePairs)
                 {
-                    if (evt.Data.Properties.ContainsKey(value.Key))
+                    LogIfDebug("Setting DevOps Static Property: " + value.Key + " Value: " + value.Value);
+                    document.Add(
+                    new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
                     {
-                        LogIfDebug("Setting DevOps Static Property: " + value.Value + " Value: " + value.Key);
-                        document.Add(
-                        new Microsoft.VisualStudio.Services.WebApi.Patch.Json.JsonPatchOperation()
-                        {
-                            Path = $"/fields/{value.Value}",
-                            Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
-                            Value = evt.Data.Properties[value.Key]
-                        });
-                    }
+                        Path = $"/fields/{value.Key}",
+                        Operation = Microsoft.VisualStudio.Services.WebApi.Patch.Operation.Add,
+                        Value = value.Value
+                    });
                 }
             }
 
@@ -359,6 +356,7 @@ namespace Seq.App.Azure.DevOps
 
                 foreach (var m in evt.Data.Properties.Keys)
                 {
+                    LogIfDebug($"Seq Property {m} value: {evt.Data.Properties[m]}");
                     sb.Append($"<strong>{m.ToString()}</strong>: {evt.Data.Properties[m]} <br/>");
                 }
 
@@ -391,6 +389,18 @@ namespace Seq.App.Azure.DevOps
                         sb.Append(evt.Data.LocalTimestamp.ToLocalTime());
                     if (tok.ToString() == "SeqEventUrl")
                         sb.Append($"{Host.BaseUri}#/events?filter=@Id%20%3D%20'{evt.Id}'%22&show=expanded");
+                    if (tok.ToString() == "SeqException")
+                    {
+                        if ((evt?.Data?.Exception ?? "").HasValue())
+                            sb.AppendFormat("<strong>Exception:</strong><p style=\"background-color: #921b3c; color: white; border-left: 8px solid #7b1e38;\">{0}</p>", evt.Data.Exception);
+                    }
+                    if (tok.ToString() == "SeqPropertiesList")
+                    {
+                        foreach (var m in evt.Data.Properties.Keys)
+                        {
+                            sb.Append($"<strong>{m.ToString()}</strong>: {evt.Data.Properties[m]} <br/>");
+                        }
+                    }
                     else
                         sb.Append(evt.Data.Properties[tok.ToString().Replace("{", "").Replace("}", "")]);
                 }
