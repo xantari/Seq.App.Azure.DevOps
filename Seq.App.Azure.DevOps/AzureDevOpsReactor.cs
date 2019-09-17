@@ -153,6 +153,7 @@ namespace Seq.App.Azure.DevOps
         #endregion //Settings
 
         private string _step = "";
+        private const uint AlertEventType = 0xA1E77000;
 
         public void On(Event<LogEventData> evt)
         {
@@ -390,7 +391,23 @@ namespace Seq.App.Azure.DevOps
             else
             {
                 var sb = new StringBuilder();
-                sb.AppendFormat("<strong>Event Id:</strong> {0}<br/>", evt.Id);
+                if (IsAlert(evt))
+                {
+                    var dashboardUrl = SafeGetProperty(evt, "DashboardUrl");
+                    var condition = SafeGetProperty(evt, "Condition");
+                    var dashboardTitle = SafeGetProperty(evt, "DashboardTitle");
+                    var chartTitle = SafeGetProperty(evt, "ChartTitle");
+                    var ownerNamespace = "";
+                    if (evt.Data.Properties.TryGetValue("OwnerUsername", out var ownerUsernameProperty) && ownerUsernameProperty is string ownerUsername)
+                    {
+                        if (!string.IsNullOrEmpty(ownerUsername))
+                            ownerNamespace = ownerUsername + "/";
+                    }
+                    sb.AppendFormat("<strong>Alert Event Id:</strong> {0}<br/>", evt.Id);
+                    sb.Append($"<strong>Dashboard URL:</strong> <a href=\"{dashboardUrl}\" target=\"_blank\">{ownerNamespace}{dashboardTitle}/{chartTitle}</a><br/>");
+                }
+                else
+                    sb.AppendFormat("<strong>Event Id:</strong> {0}<br/>", evt.Id);
                 sb.AppendFormat("<strong>Level:</strong> {0}<br/>", evt.Data.Level.ToString());
                 sb.AppendFormat("<strong>Timestamp:</strong> {0}<br/>", evt.Data.LocalTimestamp.ToLocalTime());
                 sb.Append($"<strong>Event Url:</strong> <a href=\"{GetSeqUrl(evt)}\" target=\"_blank\">Seq Event Url</a><br/>");
@@ -452,6 +469,26 @@ namespace Seq.App.Azure.DevOps
                 }
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Dashboard alerts create a "virtual" event id, so it doesn't actually point to a specific log, but potentially a set of log events
+        /// </summary>
+        /// <param name="evt"></param>
+        /// <returns></returns>
+        private static bool IsAlert(Event<LogEventData> evt)
+        {
+            return evt.EventType == AlertEventType;
+        }
+
+        private static string SafeGetProperty(Event<LogEventData> evt, string propertyName)
+        {
+            if (evt.Data.Properties.TryGetValue(propertyName, out var value))
+            {
+                if (value == null) return "`null`";
+                return value.ToString();
+            }
+            return "";
         }
     }
 }
