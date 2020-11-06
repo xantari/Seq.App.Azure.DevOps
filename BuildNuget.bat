@@ -1,1 +1,0 @@
-dotnet pack /p:NuspecFile=.\Seq.App.Azure.Devops.nuspec -c Debug -o .nuget
