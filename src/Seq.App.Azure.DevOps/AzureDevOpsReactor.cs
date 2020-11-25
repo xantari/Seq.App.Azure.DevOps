@@ -9,56 +9,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft;
-using Serilog.Events;
 using Serilog.Parsing;
-using Newtonsoft.Json;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
+using LogEventLevel = Seq.Apps.LogEvents.LogEventLevel;
+
+// ReSharper disable UnusedAutoPropertyAccessor.Global, UnusedType.Global, MemberCanBePrivate.Global, ArrangeTypeMemberModifiers
 
 namespace Seq.App.Azure.DevOps
 {
     [SeqApp("Azure DevOps",
-      Description = "Posts seq event as a work item to Azure DevOps")]
-    public class AzureDevOpsReactor : Reactor, ISubscribeTo<LogEventData>
+        Description = "Posts seq event as a work item to Azure DevOps")]
+    public class AzureDevOpsReactor : Reactor, ISubscribeToAsync<LogEventData>
     {
-        #region Settings 
+        #region Settings
+
         [SeqAppSetting(DisplayName = "Azure DevOps Url",
-            IsOptional = false,
-             HelpText = "URL of your Azure DevOps Site (Example: https://yoursite.visualstudio.com/ or https://dev.azure.com/{your organization}/).")]
+            HelpText = "URL of your Azure DevOps Site (Example: https://yoursite.visualstudio.com/ or https://dev.azure.com/{your organization}/).")]
         public string AzureDevOpsUrl { get; set; }
 
         [SeqAppSetting(DisplayName = "Project",
-    IsOptional = false,
-     HelpText = "Project Name, this is the {your project} part of your project URL (Example: https://yoursite.visualstudio.com/{your project} or https://dev.azure.com/{your organization}/{your project}).")]
+            HelpText = "Project Name, this is the {your project} part of your project URL (Example: https://yoursite.visualstudio.com/{your project} or https://dev.azure.com/{your organization}/{your project}).")]
         public string Project { get; set; }
 
         [SeqAppSetting(DisplayName = "Azure DevOps Personal Access Token",
-            IsOptional = false,
-             HelpText = "Azure DevOps Personal Access Token.")]
+            HelpText = "Azure DevOps Personal Access Token.")]
         public string PersonalAccessToken { get; set; }
 
-        [SeqAppSetting(DisplayName = "Comma seperated list of event levels",
+        [SeqAppSetting(DisplayName = "Comma separated list of event levels",
             IsOptional = true,
             HelpText = "If specified Azure DevOps issue (work item or bug) will be created only for the specified event levels, other levels will be discarded")]
         public string LogEventLevels { get; set; }
 
-        public List<Apps.LogEvents.LogEventLevel> LogEventLevelList
+        public List<LogEventLevel> LogEventLevelList
         {
             get
             {
-                List<Apps.LogEvents.LogEventLevel> result = new List<Apps.LogEvents.LogEventLevel>();
+                var result = new List<LogEventLevel>();
                 if (string.IsNullOrEmpty(LogEventLevels))
                     return result;
 
-                var strValues = LogEventLevels.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                if ((strValues?.Length ?? 0) == 0)
+                var strValues = LogEventLevels.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                if (strValues.Length == 0)
                     return result;
 
                 strValues.Aggregate(result, (acc, strValue) =>
                 {
-                    Apps.LogEvents.LogEventLevel enumValue = Apps.LogEvents.LogEventLevel.Debug;
-                    if (Enum.TryParse(strValue, out enumValue))
+                    if (Enum.TryParse(strValue, out LogEventLevel enumValue))
                         acc.Add(enumValue);
                     return acc;
                 });
@@ -68,8 +65,8 @@ namespace Seq.App.Azure.DevOps
         }
 
         [SeqAppSetting(DisplayName = "Title",
-        HelpText = "Title of created Azure DevOps items. Use {PropertyName} to insert properties into the field. Ex. {Application}, {Message}, etc. If not defined with will follow the format: Seq Event - {message}. Max Length is 255. The following special properties are available: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl, SeqPropertiesList, SeqException",
-        IsOptional = true)]
+            HelpText = "Title of created Azure DevOps items. Use {PropertyName} to insert properties into the field. Ex. {Application}, {Message}, etc. If not defined with will follow the format: Seq Event - {message}. Max Length is 255. The following special properties are available: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl, SeqPropertiesList, SeqException",
+            IsOptional = true)]
         public string Title { get; set; }
 
         [SeqAppSetting(DisplayName = "Description",
@@ -80,14 +77,13 @@ namespace Seq.App.Azure.DevOps
 
         //Microsoft.VSTS.CMMI.Symptom
         [SeqAppSetting(DisplayName = "Description Mapping Field",
-            HelpText = "Description DevOps Mapping Field. For Bugs using CMMI this typically be Microsoft.VSTS.CMMI.Symptom, For CMMI Tasks it would be: System.Description. For Bugs in Scrum you might use Repro Steps: Microsoft.VSTS.TCM.ReproSteps",
-            IsOptional = false)]
+            HelpText = "Description DevOps Mapping Field. For Bugs using CMMI this typically be Microsoft.VSTS.CMMI.Symptom, For CMMI Tasks it would be: System.Description. For Bugs in Scrum you might use Repro Steps: Microsoft.VSTS.TCM.ReproSteps")]
         public string DescriptionDevOpsMappingField { get; set; }
 
         [SeqAppSetting(
             DisplayName = "Tags",
             IsOptional = true,
-            HelpText = "Comma seperated list of issue tags to apply to item in DevOps")]
+            HelpText = "Comma separated list of issue tags to apply to item in DevOps")]
         public string Tags { get; set; }
 
         [SeqAppSetting(
@@ -97,15 +93,15 @@ namespace Seq.App.Azure.DevOps
         public string AreaPath { get; set; }
 
         [SeqAppSetting(
-          DisplayName = "Iteration",
-          IsOptional = true,
-          HelpText = "Iteration of the DevOps item")]
+            DisplayName = "Iteration",
+            IsOptional = true,
+            HelpText = "Iteration of the DevOps item")]
         public string Iteration { get; set; }
 
         [SeqAppSetting(
-          DisplayName = "Assigned To",
-          IsOptional = true,
-          HelpText = "Who the work item should be assigned to. If left blank it will default to unassigned")]
+            DisplayName = "Assigned To",
+            IsOptional = true,
+            HelpText = "Who the work item should be assigned to. If left blank it will default to unassigned")]
         public string AssignedTo { get; set; }
 
         [SeqAppSetting(
@@ -116,7 +112,6 @@ namespace Seq.App.Azure.DevOps
 
         [SeqAppSetting(
             DisplayName = "Issue type",
-            IsOptional = false,
             HelpText = "DevOps issue type. Possible values: Task, Bug")]
         public string DevOpsIssueType { get; set; }
 
@@ -131,16 +126,16 @@ namespace Seq.App.Azure.DevOps
             DisplayName = "Seq to DevOps property mapping",
             IsOptional = true,
             HelpText = "Maps Seq properties to DevOps properties. Format: SeqProperty:DevOpsProperty. " +
-            "Seperated by Commas. " +
-            "Example: Application:Microsoft.VSTS.Build.FoundIn,MachineName:Microsoft.VSTS.TCM.SystemInfo")]
+                       "Separated by Commas. " +
+                       "Example: Application:Microsoft.VSTS.Build.FoundIn,MachineName:Microsoft.VSTS.TCM.SystemInfo")]
         public string SeqToDevOpsMapping { get; set; }
 
         [SeqAppSetting(
             DisplayName = "DevOps property mappings",
             IsOptional = true,
-            HelpText = "Maps DevOps properties to staticly defined values. Format: DevOpsProperty:StaticValue " +
-            "Seperated by Commas. " +
-            "Example: Priority:2,Triage:Level 1")]
+            HelpText = "Maps DevOps properties to statically defined values. Format: DevOpsProperty:StaticValue " +
+                       "Separated by Commas. " +
+                       "Example: Priority:2,Triage:Level 1")]
         public string DevOpsMappings { get; set; }
 
         [SeqAppSetting(
@@ -155,79 +150,73 @@ namespace Seq.App.Azure.DevOps
         private string _step = "";
         private const uint AlertEventType = 0xA1E77000;
 
-        public void On(Event<LogEventData> evt)
+        public async Task OnAsync(Event<LogEventData> evt)
         {
+            //If the event level is defined and it is not in the list do not log it
+            if ((LogEventLevelList?.Count ?? 0) > 0 && !LogEventLevelList.Contains(evt.Data.Level))
+                return;
+
             try
             {
-                var result = CreateIssue(evt).Result;
+                await CreateIssueAsync(evt);
             }
             catch (AggregateException aex)
             {
                 var fex = aex.Flatten();
-                Log.Error(fex, "Error while creating item in Azure DevOps. Step is: {_step}", _step);
+                throw new SeqAppException($"Error while creating item in Azure DevOps. The step is: {_step}.", fex);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error while creating item in Azure DevOps. The step is: {_step}", _step);
+                throw new SeqAppException($"Error while creating item in Azure DevOps. The step is: {_step}.", ex);
             }
         }
 
-        public async Task<bool> CreateIssue(Event<LogEventData> evt)
+        private async Task CreateIssueAsync(Event<LogEventData> evt)
         {
-            if (evt == null) //Not sure when or if this could happen?
-                return false;
+            BeginStep("Connecting to Azure DevOps");
 
-            //If the event level is defined and it is not in the list do not log it
-            if ((LogEventLevelList?.Count ?? 0) > 0 && !LogEventLevelList.Contains(evt.Data.Level))
-                return false;
+            var connection = new VssConnection(new Uri(AzureDevOpsUrl),
+                new VssBasicCredential(string.Empty, PersonalAccessToken));
 
-            _step = "Beginning process";
-            LogIfDebug(_step);
-            var description = evt.Data.Exception ?? evt.Data.RenderedMessage;
-            //var messageId = ComputeId(description);
+            var workItemClient = await connection.GetClientAsync<WorkItemTrackingHttpClient>();
 
-            var connection = new VssConnection(new Uri(AzureDevOpsUrl), new VssBasicCredential(string.Empty, PersonalAccessToken));
-
-            var workitemClient = await connection.GetClientAsync<WorkItemTrackingHttpClient>();
-
-            WorkItemQueryResult workItemQueryResult = null;
             // Try to match an existing work item
             if (!string.IsNullOrEmpty(SeqEventField))
             {
-                _step = "Querying existing work item";
-                LogIfDebug(_step);
-                Wiql wiql = new Wiql()
+                BeginStep("Querying existing work item");
+                var wiql = new Wiql
                 {
                     Query = "Select [State], [Title] " +
-                "From WorkItems " +
-                "Where [" + SeqEventField + "] = '" + evt.Id + "' " +
-                "And [System.TeamProject] = '" + Project + "' " +
-                //"And [System.State] <> 'Closed' " +
-                "Order By [State] Asc, [Changed Date] Desc"
+                            "From WorkItems " +
+                            "Where [" + SeqEventField + "] = '" + evt.Id + "' " +
+                            "And [System.TeamProject] = '" + Project + "' " +
+                            //"And [System.State] <> 'Closed' " +
+                            "Order By [State] Asc, [Changed Date] Desc"
                 };
 
-                //execute the query to get the list of work items in teh results
-                workItemQueryResult = await workitemClient.QueryByWiqlAsync(wiql);
+                //execute the query to get the list of work items in the results
+                var workItemQueryResult = await workItemClient.QueryByWiqlAsync(wiql);
 
                 if (workItemQueryResult.WorkItems.Count() != 0)
                 {
                     Log.Information("Duplicate DevOps item creation prevented for event id {id}", evt.Id);
-                    return false;
+                    return;
                 }
             }
 
-            _step = "Adding fields";
-            LogIfDebug(_step);
+            BeginStep("Adding fields");
             var document = new JsonPatchDocument();
 
-            _step = "Adding title";
-            string title = $"SEQ Event - {evt.Data.RenderedMessage}".TruncateWithEllipsis(255); //DevOps has max 255 character length for title
+            BeginStep("Adding title");
+            //DevOps has max 255 character length for title
+            var title = $"SEQ Event - {evt.Data.RenderedMessage}".TruncateWithEllipsis(255);
             if (!string.IsNullOrEmpty(Title)) //User has defined their own title parsing
             {
                 title = GetSeqMappedPropertyString(Title, evt).TruncateWithEllipsis(255);
             }
+
             document.Add(
-                new JsonPatchOperation()
+                new JsonPatchOperation
                 {
                     Path = "/fields/System.Title",
                     Operation = Operation.Add,
@@ -235,7 +224,7 @@ namespace Seq.App.Azure.DevOps
                 });
 
             document.Add(
-                new JsonPatchOperation()
+                new JsonPatchOperation
                 {
                     Path = "/fields/System.AssignedTo",
                     Operation = Operation.Add,
@@ -245,7 +234,7 @@ namespace Seq.App.Azure.DevOps
             if (!ParentWorkItemLinkUrl.IsNullOrEmpty())
             {
                 document.Add(
-                    new JsonPatchOperation()
+                    new JsonPatchOperation
                     {
                         Operation = Operation.Add,
                         Path = "/relations/-",
@@ -264,8 +253,7 @@ namespace Seq.App.Azure.DevOps
 
             if (!string.IsNullOrEmpty(SeqEventField))
             {
-                _step = "Adding Seq ID mapping";
-                LogIfDebug(_step);
+                BeginStep("Adding Seq ID mapping");
                 document.Add(new JsonPatchOperation()
                 {
                     Path = "/fields/" + SeqEventField,
@@ -276,18 +264,16 @@ namespace Seq.App.Azure.DevOps
 
             if (!string.IsNullOrEmpty(Tags))
             {
-                _step = "Adding tags";
-                LogIfDebug(_step);
+                BeginStep("Adding tags");
                 document.Add(new JsonPatchOperation()
                 {
                     Path = "/fields/Tags",
                     Operation = Operation.Add,
-                    Value = Tags //DevOps takes a comma seperated list without any alterations
+                    Value = Tags //DevOps takes a comma separated list without any alterations
                 });
             }
 
-            _step = "Setting description";
-            LogIfDebug(_step);
+            BeginStep("Setting description");
 
             document.Add(
                 new JsonPatchOperation()
@@ -299,8 +285,7 @@ namespace Seq.App.Azure.DevOps
 
             if (!string.IsNullOrEmpty(SeqToDevOpsMapping))
             {
-                _step = "Setting Seq to DevOps property mappings";
-                LogIfDebug(_step);
+                BeginStep("Setting Seq to DevOps property mappings");
                 var keyValuePairs = SeqToDevOpsMapping.ParseKeyValueArray();
                 foreach (var value in keyValuePairs)
                 {
@@ -308,74 +293,74 @@ namespace Seq.App.Azure.DevOps
                     {
                         LogIfDebug("Setting Seq to DevOps Property: " + value.Value + " Value: " + value.Key);
                         document.Add(
-                        new JsonPatchOperation()
-                        {
-                            Path = $"/fields/{value.Value}",
-                            Operation = Operation.Add,
-                            Value = evt.Data.Properties[value.Key]
-                        });
+                            new JsonPatchOperation
+                            {
+                                Path = $"/fields/{value.Value}",
+                                Operation = Operation.Add,
+                                Value = evt.Data.Properties[value.Key]
+                            });
                     }
                 }
             }
 
             if (!string.IsNullOrEmpty(DevOpsMappings))
             {
-                _step = "Setting DevOps static property mappings";
-                LogIfDebug(_step);
+                BeginStep("Setting DevOps static property mappings");
                 var keyValuePairs = DevOpsMappings.ParseKeyValueArray();
                 foreach (var value in keyValuePairs)
                 {
-                    LogIfDebug("Setting DevOps Static Property: " + value.Key + " Value: " + value.Value);
+                    LogIfDebug("Setting DevOps Static Property: {Property} Value: {Value}", value.Key, value.Value);
                     document.Add(
-                    new JsonPatchOperation()
-                    {
-                        Path = $"/fields/{value.Key}",
-                        Operation = Operation.Add,
-                        Value = value.Value
-                    });
+                        new JsonPatchOperation
+                        {
+                            Path = $"/fields/{value.Key}",
+                            Operation = Operation.Add,
+                            Value = value.Value
+                        });
                 }
             }
 
             if (!string.IsNullOrEmpty(AreaPath))
             {
-                _step = "Setting Area Path";
-                LogIfDebug(_step);
+                BeginStep("Setting Area Path");
                 document.Add(
-                new JsonPatchOperation()
-                {
-                    Path = $"/fields/System.AreaPath",
-                    Operation = Operation.Add,
-                    Value = AreaPath
-                });
+                    new JsonPatchOperation
+                    {
+                        Path = "/fields/System.AreaPath",
+                        Operation = Operation.Add,
+                        Value = AreaPath
+                    });
             }
 
             if (!string.IsNullOrEmpty(Iteration))
             {
-                _step = "Setting Iteration";
-                LogIfDebug(_step);
+                BeginStep("Setting Iteration");
                 document.Add(
-                new JsonPatchOperation()
-                {
-                    Path = $"/fields/System.IterationPath",
-                    Operation = Operation.Add,
-                    Value = Iteration
-                });
+                    new JsonPatchOperation
+                    {
+                        Path = "/fields/System.IterationPath",
+                        Operation = Operation.Add,
+                        Value = Iteration
+                    });
             }
 
-            _step = "Adding work item";
-            LogIfDebug(_step);
-            var workitem = await workitemClient.CreateWorkItemAsync(document, Project, DevOpsIssueType, false, true);
+            BeginStep("Adding work item");
+            _ = await workItemClient.CreateWorkItemAsync(document, Project, DevOpsIssueType, false, true);
 
-            _step = "Finished process";
-            LogIfDebug(_step);
-            return true;
+            BeginStep("Finished process");
         }
 
-        private void LogIfDebug(string message)
+        private void BeginStep(string step)
+        {
+            _step = step;
+            LogIfDebug("Step {Step}", step);
+        }
+
+        private void LogIfDebug(string messageTemplate, params object[] args)
         {
             if (DebugMode)
             {
-                Log.Debug("{msg}", message);
+                Log.Debug(messageTemplate, args);
             }
         }
 
@@ -388,42 +373,45 @@ namespace Seq.App.Azure.DevOps
             {
                 return GetSeqMappedPropertyString(Message, evt);
             }
-            else
+
+            var sb = new StringBuilder();
+            if (IsAlert(evt))
             {
-                var sb = new StringBuilder();
-                if (IsAlert(evt))
+                var dashboardUrl = SafeGetProperty(evt, "DashboardUrl");
+                var dashboardTitle = SafeGetProperty(evt, "DashboardTitle");
+                var chartTitle = SafeGetProperty(evt, "ChartTitle");
+                var ownerNamespace = "";
+                if (evt.Data.Properties.TryGetValue("OwnerUsername", out var ownerUsernameProperty) &&
+                    ownerUsernameProperty is string ownerUsername)
                 {
-                    var dashboardUrl = SafeGetProperty(evt, "DashboardUrl");
-                    var condition = SafeGetProperty(evt, "Condition");
-                    var dashboardTitle = SafeGetProperty(evt, "DashboardTitle");
-                    var chartTitle = SafeGetProperty(evt, "ChartTitle");
-                    var ownerNamespace = "";
-                    if (evt.Data.Properties.TryGetValue("OwnerUsername", out var ownerUsernameProperty) && ownerUsernameProperty is string ownerUsername)
-                    {
-                        if (!string.IsNullOrEmpty(ownerUsername))
-                            ownerNamespace = ownerUsername + "/";
-                    }
-                    sb.AppendFormat("<strong>Alert Event Id:</strong> {0}<br/>", evt.Id);
-                    sb.Append($"<strong>Dashboard URL:</strong> <a href=\"{dashboardUrl}\" target=\"_blank\">{ownerNamespace}{dashboardTitle}/{chartTitle}</a><br/>");
-                }
-                else
-                    sb.AppendFormat("<strong>Event Id:</strong> {0}<br/>", evt.Id);
-                sb.AppendFormat("<strong>Level:</strong> {0}<br/>", evt.Data.Level.ToString());
-                sb.AppendFormat("<strong>Timestamp:</strong> {0}<br/>", evt.Data.LocalTimestamp.ToLocalTime());
-                sb.Append($"<strong>Event Url:</strong> <a href=\"{GetSeqUrl(evt)}\" target=\"_blank\">Seq Event Url</a><br/>");
-
-                foreach (var m in evt.Data.Properties.Keys)
-                {
-                    LogIfDebug($"Seq Property {m} value: {evt.Data.Properties[m]}");
-                    sb.Append($"<strong>{m.ToString()}</strong>: {evt.Data.Properties[m]} <br/>");
+                    if (!string.IsNullOrEmpty(ownerUsername))
+                        ownerNamespace = ownerUsername + "/";
                 }
 
-                sb.Append($"<strong>Message:</strong> {evt.Data.RenderedMessage}<br/>");
-
-                if ((evt?.Data?.Exception ?? "").HasValue())
-                    sb.AppendFormat("<strong>Exception:</strong><p style=\"background-color: #921b3c; color: white; border-left: 8px solid #7b1e38;\">{0}</p>", evt.Data.Exception);
-                return sb.ToString();
+                sb.AppendFormat("<strong>Alert Event Id:</strong> {0}<br/>", evt.Id);
+                sb.Append($"<strong>Dashboard URL:</strong> <a href=\"{dashboardUrl}\" target=\"_blank\">{ownerNamespace}{dashboardTitle}/{chartTitle}</a><br/>");
             }
+            else
+                sb.AppendFormat("<strong>Event Id:</strong> {0}<br/>", evt.Id);
+
+            sb.AppendFormat("<strong>Level:</strong> {0}<br/>", evt.Data.Level.ToString());
+            sb.AppendFormat("<strong>Timestamp:</strong> {0}<br/>", evt.Data.LocalTimestamp.ToLocalTime());
+            sb.Append(
+                $"<strong>Event Url:</strong> <a href=\"{GetSeqUrl(evt)}\" target=\"_blank\">Seq Event Url</a><br/>");
+
+            foreach (var m in evt.Data.Properties.Keys)
+            {
+                LogIfDebug($"Seq Property {m} value: {evt.Data.Properties[m]}");
+                sb.Append($"<strong>{m}</strong>: {evt.Data.Properties[m]} <br/>");
+            }
+
+            sb.Append($"<strong>Message:</strong> {evt.Data.RenderedMessage}<br/>");
+
+            if ((evt.Data?.Exception ?? "").HasValue())
+                sb.AppendFormat(
+                    "<strong>Exception:</strong><p style=\"background-color: #921b3c; color: white; border-left: 8px solid #7b1e38;\">{0}</p>",
+                    evt.Data.Exception);
+            return sb.ToString();
         }
 
         private string GetSeqUrl(Event<LogEventData> evt)
@@ -433,9 +421,8 @@ namespace Seq.App.Azure.DevOps
 
         private string GetSeqMappedPropertyString(string messageTemplate, Event<LogEventData> evt)
         {
-            MessageTemplate boundMessageTemplate = null;
-            IEnumerable<LogEventProperty> props = new List<LogEventProperty>();
-            Log.BindMessageTemplate(messageTemplate, evt.Data.Properties.Select(p => p.Value).ToArray(), out boundMessageTemplate, out props);
+            Log.BindMessageTemplate(messageTemplate, evt.Data.Properties.Select(p => p.Value).ToArray(),
+                out var boundMessageTemplate, out _);
 
             var sb = new StringBuilder();
             foreach (var tok in boundMessageTemplate.Tokens)
@@ -454,20 +441,24 @@ namespace Seq.App.Azure.DevOps
                         sb.Append(GetSeqUrl(evt));
                     if (tok.ToString() == "SeqException")
                     {
-                        if ((evt?.Data?.Exception ?? "").HasValue())
-                            sb.AppendFormat("<strong>Exception:</strong><p style=\"background-color: #921b3c; color: white; border-left: 8px solid #7b1e38;\">{0}</p>", evt.Data.Exception);
+                        if ((evt.Data?.Exception ?? "").HasValue())
+                            sb.AppendFormat(
+                                "<strong>Exception:</strong><p style=\"background-color: #921b3c; color: white; border-left: 8px solid #7b1e38;\">{0}</p>",
+                                evt.Data.Exception);
                     }
+
                     if (tok.ToString() == "SeqPropertiesList")
                     {
                         foreach (var m in evt.Data.Properties.Keys)
                         {
-                            sb.Append($"<strong>{m.ToString()}</strong>: {evt.Data.Properties[m]} <br/>");
+                            sb.Append($"<strong>{m}</strong>: {evt.Data.Properties[m]} <br/>");
                         }
                     }
                     else
                         sb.Append(evt.Data.Properties[tok.ToString().Replace("{", "").Replace("}", "")]);
                 }
             }
+
             return sb.ToString();
         }
 
@@ -488,6 +479,7 @@ namespace Seq.App.Azure.DevOps
                 if (value == null) return "`null`";
                 return value.ToString();
             }
+
             return "";
         }
     }

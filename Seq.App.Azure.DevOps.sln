@@ -1,22 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.271
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seq.App.Azure.DevOps", "Seq.App.Azure.DevOps\Seq.App.Azure.DevOps.csproj", "{91D16842-EA68-4BA0-8427-DF6EBFD7B90F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seq.App.Azure.DevOps", "src\Seq.App.Azure.DevOps\Seq.App.Azure.DevOps.csproj", "{91D16842-EA68-4BA0-8427-DF6EBFD7B90F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{9B34AEE8-67B7-4859-930D-2CEBBDDAADD6}"
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
+		build.ps1 = build.ps1
 		LICENSE = LICENSE
 		readme.md = readme.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6ED53D7C-E336-45A6-BC66-696DA2DECE40}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{D328AD71-CB39-4477-8CF0-3C608DEB1573}"

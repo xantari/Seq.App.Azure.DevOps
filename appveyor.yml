@@ -1,23 +1,16 @@
-﻿image: Visual Studio 2017
-version: 1.0.{build}
-configuration: Release
-platform: Any CPU
-assembly_info:
-  patch: true
-  file: '**\AssemblyInfo.*'
-  assembly_version: '{version}.0'
-  assembly_file_version: '{version}.0'
-  assembly_informational_version: '{version}'
-before_build:
-- cmd: nuget.exe restore Seq.App.Azure.DevOps.sln
-build:
-  project: Seq.App.Azure.DevOps.sln
-  publish_nuget: true
-  publish_nuget_symbols: false
-  verbosity: minimal
+﻿version: '{build}'
+skip_tags: true
+image: Visual Studio 2019
+install:
+build_script:
+  - ps: ./Build.ps1
+test: off
+artifacts:
+  - path: artifacts/Seq.App.*.nupkg
 deploy:
-- provider: NuGet
-  api_key:
-    secure: WwOCJf+zR8dGUpTOdT6SD3wW3ZzIBzK1Tl67IaJ4TICAohn0RD11Y36aH/cOr0Hb
-  on:
-    branch: master
+  - provider: NuGet
+    api_key:
+      secure: WwOCJf+zR8dGUpTOdT6SD3wW3ZzIBzK1Tl67IaJ4TICAohn0RD11Y36aH/cOr0Hb
+    skip_symbols: true
+    on:
+      branch: /^(master|dev)$/

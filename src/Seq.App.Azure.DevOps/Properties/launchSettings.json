@@ -1,0 +1,9 @@
+﻿{
+  "profiles": {
+    "Run": {
+      "commandName": "Executable",
+      "executablePath": "seqcli",
+      "commandLineArgs": "app run -d $(TargetDir) -p ApiKey=thisisatest -p DescriptionDevOpsMappingField=System.Description -p AzureDevOpsUrl=https://localhost/azuredevops -p DevOpsIssueType=Bug -p Project=https://localhost/project -p PersonalAccessToken=12345 -p DebugMode=True"
+    }
+  }
+}
