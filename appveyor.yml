@@ -1,16 +1,31 @@
-﻿version: '{build}'
-skip_tags: true
+﻿version: 1.0.{build}
+branches:
+  only:
+  - master
 image: Visual Studio 2019
-install:
-build_script:
-  - ps: ./Build.ps1
-test: off
-artifacts:
-  - path: artifacts/Seq.App.*.nupkg
+configuration: Release
+platform: Any CPU
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  version_prefix: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+nuget:
+  project_feed: true
+before_build:
+- cmd: dotnet restore
+build:
+  publish_nuget: true
+  include_nuget_references: true
+  verbosity: minimal
 deploy:
-  - provider: NuGet
-    api_key:
-      secure: WwOCJf+zR8dGUpTOdT6SD3wW3ZzIBzK1Tl67IaJ4TICAohn0RD11Y36aH/cOr0Hb
-    skip_symbols: true
-    on:
-      branch: /^(master|dev)$/
+- provider: NuGet
+  api_key:
+    secure: Fj/cw/L8FDXnCHjIJEQJ1FHea0WDYYdO7XQvZcHwD+7SUQK39iRLYw8PcIHh8pkS
+  skip_symbols: false
+  on:
+    branch: master
