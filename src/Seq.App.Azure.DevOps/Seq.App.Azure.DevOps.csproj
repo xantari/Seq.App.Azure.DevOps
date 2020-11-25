@@ -12,6 +12,7 @@
         <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
         <TreatSpecificWarningsAsErrors />
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageIcon>devopssuite.png</PackageIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,5 +28,9 @@
           <PackagePath></PackagePath>
         </None>
         <None Include="./obj/publish/**/*" Exclude="./obj/publish/$(MSBuildProjectName).dll;./obj/publish/Seq.Apps.dll;./obj/publish/Serilog.dll" Pack="true" PackagePath="lib/$(TargetFramework)" />
+        <None Include="..\..\assets\devopssuite.png">
+          <Pack>True</Pack>
+          <PackagePath></PackagePath>
+        </None>
     </ItemGroup>
 </Project>
