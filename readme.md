@@ -19,7 +19,7 @@ Example: https://yoursite.visualstudio.com/ or https://dev.azure.com/{your organ
 
 **Azure DevOps Personal Access Token:** This would be your Personal Access Token retrieved from Azure DevOps so that the Seq Server can issue Web API requests to DevOps REST API.
 
-**Comma seperated list of event levels (optional):** This field allows you to enter the Seq event level filters. This is only useful if you decide to stream incoming events to Azure DevOps. It allows you to set `Informational`, `Warning`, `Error`, `Fatal`, `Debug` values. The list should be comma seperated.
+**Comma separated list of event levels (optional):** This field allows you to enter the Seq event level filters. This is only useful if you decide to stream incoming events to Azure DevOps. It allows you to set `Informational`, `Warning`, `Error`, `Fatal`, `Debug` values. The list should be comma separated.
 
 **Title:** The Title Field defaults to "Seq Event - {message}", where {message} is the default Seq message you see on the Seq log page. You can customize the title with any of the Seq property names. The following built in tokens are provided: SeqEventId, SeqLevel, SeqTimestamp, SeqEventUrl, SeqPropertiesList, SeqException
 
@@ -45,7 +45,7 @@ The following built in tokens are provided: SeqEventId, SeqLevel, SeqTimestamp, 
 
 >**NOTE:** See the field definitions link above for help on field names.
 
-**Tags:** The tags is a comma seperated list of tags to add to the work item.
+**Tags:** The tags is a comma separated list of tags to add to the work item.
 
 **Area Path:** The area path is the area path defined in Azure DevOps to add it to. If not defined it will take the default area path.
 
@@ -61,14 +61,14 @@ The following built in tokens are provided: SeqEventId, SeqLevel, SeqTimestamp, 
 
 **Seq to DevOps property mapping:** Maps Seq properties to DevOps properties.  
 Format: SeqProperty:DevOpsProperty.  
-Multiple values seperated by Commas.  
+Multiple values separated by commas.
 `Example:` Application:Microsoft.VSTS.Build.FoundIn,MachineName:Microsoft.VSTS.TCM.SystemInfo 
 
 >**NOTE:** See the field definitions link above for help on field names.
 
-**DevOps property mappings:** Maps DevOps properties to staticly defined values.  
+**DevOps property mappings:** Maps DevOps properties to statically defined values.
 Format: DevOpsProperty:StaticValue  
-Multiple values seperated by Commas.  
+Multiple values separated by commas.
 `Example:` Priority:2,Triage:Level 1
 
 >**NOTE:** See the field definitions link above for help on field names.
